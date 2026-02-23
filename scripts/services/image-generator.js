@@ -8,18 +8,23 @@ export class SceneImageGenerator {
         this.apiKey = apiKey;
     }
 
-    get promptFormatterSystem() {
+    getPromptFormatterSystem(options = {}) {
+        const labelsRule = options.includeRoomLabels
+            ? "Ensure you describe that the map has text labels painted on the ground displaying the room names clearly."
+            : "IMPORTANT NO TEXT: Do not include any text labels, room names, or typography on the map.";
+
         return `You are an expert AI prompt engineer for a top-down virtual tabletop map generator (like DALL-E 3 or Imagen 4).
 You have an outline of a scene/dungeon.
 Your goal is to write a single, highly detailed, comma-separated paragraph prompt to generate a realistic, high-quality, high-resolution rendering of this map.
 Do not describe UI elements, grids, or character tokens. Describe the textures, lighting, atmosphere, and layout.
+${labelsRule}
 Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
     }
 
-    async generateFinalPrompt(outline) {
+    async generateFinalPrompt(outline, options = {}) {
         console.log("SceneImageGenerator | Generating final prompt for Imagen");
         const outlineContext = JSON.stringify(outline, null, 2);
-        const fullPrompt = `${this.promptFormatterSystem}\n\nSCENE OUTLINE:\n${outlineContext}`;
+        const fullPrompt = `${this.getPromptFormatterSystem(options)}\n\nSCENE OUTLINE:\n${outlineContext}`;
 
         try {
             let finalPrompt = await callGemini({

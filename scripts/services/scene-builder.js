@@ -28,7 +28,7 @@ export class SceneBuilder {
             img.src = imagePath;
         });
 
-        const gridSize = 100; // standard
+        const gridSize = 40; // standard 40px scale as requested
 
         // 3. Create the base Scene document
         const sceneData = {

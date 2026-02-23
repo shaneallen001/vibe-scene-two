@@ -24,7 +24,8 @@ export class ScenePipeline {
             outline: null,
             svg: null,
             imageBuffer: null,
-            sceneId: null
+            sceneId: null,
+            options: {}
         };
 
         this.outlineGenerator = new SceneOutlineGenerator(this.apiKey);
@@ -35,9 +36,10 @@ export class ScenePipeline {
     /**
      * Phase 1: Generate Conceptual Outline
      */
-    async generateOutline(userPrompt) {
+    async generateOutline(userPrompt, options = {}) {
         console.log(`ScenePipeline | --- PHASE 1: Concept to Outline ---`);
         this.state.userConcept = userPrompt;
+        this.state.options = options;
 
         try {
             this.state.outline = await this.outlineGenerator.generateOutline(userPrompt);
@@ -56,7 +58,7 @@ export class ScenePipeline {
         if (!this.state.outline) throw new Error("Missing outline for Phase 2");
 
         try {
-            this.state.svg = await this.svgGenerator.generateSvg(this.state.outline);
+            this.state.svg = await this.svgGenerator.generateSvg(this.state.outline, this.state.options);
             return this.state.svg;
         } catch (error) {
             console.error("ScenePipeline | Phase 2 Failed:", error);
@@ -72,7 +74,7 @@ export class ScenePipeline {
         if (!this.state.outline) throw new Error("Missing outline for Phase 3");
 
         try {
-            const finalPrompt = await this.imageGenerator.generateFinalPrompt(this.state.outline);
+            const finalPrompt = await this.imageGenerator.generateFinalPrompt(this.state.outline, this.state.options);
             this.state.imageBuffer = await this.imageGenerator.generateImage(finalPrompt, this.state.svg);
             return this.state.imageBuffer;
         } catch (error) {

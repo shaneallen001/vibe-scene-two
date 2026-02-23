@@ -8,7 +8,11 @@ export class SvgGenerator {
         this.apiKey = apiKey;
     }
 
-    get systemPrompt() {
+    getSystemPrompt(options = {}) {
+        const labelsRule = options.includeRoomLabels
+            ? "- Add simple text labels in the center of rooms to identify them. Text should be white or high contrast."
+            : "- DO NOT add any text labels or room names. The layout must be purely visual/structural without words.";
+
         return `You are an expert cartographer building a top-down, 2D map layout in SVG format for a virtual tabletop.
 You will be given a textual outline of the scene describing rooms and their purposes.
 Your goal is to generate ONLY a valid, self-contained SVG string that visually represents this layout.
@@ -20,17 +24,17 @@ Rules for the SVG:
 - Draw rectangles, polygons, or circles for rooms.
 - IMPORTANT: For each room element (rect, polygon, circle), you MUST include a \`data-room-id\` attribute that EXACTLY matches the \`id\` field of the room from the SCENE OUTLINE JSON.
 - Indicate doors, passages, or openings between connecting rooms. Draw these opening indicators using thick <line> elements (e.g., stroke="white" or stroke="brown" with stroke-width="8") that bridge the adjoining walls. This lets the image generation process know where it is open vs closed.
-- Add simple text labels in the center of rooms to identify them. Text should be white or high contrast.
+${labelsRule}
 - Ensure the viewBox is appropriately sized (e.g., "0 0 1000 1000").
 - No markdown formatting wrappers like \`\`\`svg or HTML wrappers. Just output the raw <svg>...</svg> element.`;
     }
 
-    async generateSvg(outline) {
+    async generateSvg(outline, options = {}) {
         console.log("SvgGenerator | Generating SVG layout for outline:", outline.title);
 
         // Convert outline JSON to a clean string format for the prompt
         const outlineContext = JSON.stringify(outline, null, 2);
-        const fullPrompt = `${this.systemPrompt}\n\nSCENE OUTLINE:\n${outlineContext}`;
+        const fullPrompt = `${this.getSystemPrompt(options)}\n\nSCENE OUTLINE:\n${outlineContext}`;
 
         try {
             let svg = await callGemini({

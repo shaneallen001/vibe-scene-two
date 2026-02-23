@@ -11,6 +11,7 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
         this.pipeline = new ScenePipeline();
         this.step = 1;
         this.userPrompt = "";
+        this.includeRoomLabels = false;
     }
 
     static DEFAULT_OPTIONS = {
@@ -42,6 +43,7 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
         return {
             step: this.step,
             userPrompt: this.userPrompt,
+            includeRoomLabels: this.includeRoomLabels,
             outline: this.pipeline.state.outline,
             svg: this.pipeline.state.svg,
             imageBuffer: this.pipeline.state.imageBuffer
@@ -67,6 +69,9 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
             const textarea = this.element.querySelector('textarea[name="userPrompt"]');
             if (textarea) this.userPrompt = textarea.value.trim();
 
+            const checkbox = this.element.querySelector('input[name="includeRoomLabels"]');
+            if (checkbox) this.includeRoomLabels = checkbox.checked;
+
             if (!this.userPrompt) {
                 VibeToast.warn("Please enter a concept for the scene.");
                 return;
@@ -74,7 +79,7 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
 
             this.showLoading("Generating Outline and SVG Layout...");
             try {
-                await this.pipeline.generateOutline(this.userPrompt);
+                await this.pipeline.generateOutline(this.userPrompt, { includeRoomLabels: this.includeRoomLabels });
                 await this.pipeline.generateSvg();
                 this.step = 2; // Move to review outline
             } catch (e) {

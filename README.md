@@ -18,3 +18,5 @@ This module is currently in development.
 - Fixed an issue where parsed walls and lights were drawn off-center relative to the final generated map due to Foundry's default scene padding logic (`scene.dimensions.sceneX/Y`).
 - Addressed map scaling issues: the map bounds now automatically shrink or grow to dynamically match the intrinsic resolution of the Imagen 4 generated backdrop (such as 1024x1024), yielding realistic 5ft-to-100px square measurements.
 - Overhauled the SVG cartography prompt to include `<line>` indicators for doors or connected openings between rooms, greatly increasing the mechanical usefulness of the map and ensuring that the final diffusion render respects traversable passageways!
+- Scaled up the grid resolution by setting the generative engine's scale factor to 40 instead of 100 to make Foundry tokens visually correct relative to the newly added Imagen maps.
+- Implemented a UI toggle switch letting users decide to either paint room names directly on the map or omit them and rely exclusively on automatically placed Journals.
