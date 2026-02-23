@@ -1,0 +1,8 @@
+{
+    "name": "vibe-scene-two",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "test:pipeline": "node testing-loop.js"
+    }
+}

@@ -1,0 +1,69 @@
+<div class="vibe-scene-two-app">
+    <div class="vibe-stepper">
+        <div class="step {{#if (eq step 1)}}active{{/if}}">1. Concept</div>
+        <div class="step {{#if (eq step 2)}}active{{/if}}">2. Outline & Layout</div>
+        <div class="step {{#if (eq step 3)}}active{{/if}}">3. Final Review</div>
+    </div>
+
+    <hr>
+
+    <div class="step-content">
+        {{#if (eq step 1)}}
+        <div class="form-group stacked">
+            <label>What kind of scene do you want to generate?</label>
+            <p class="notes">Describe the biome, interior/exterior, specific rooms, and overall vibe. E.g., "A cozy
+                interior of a fantasy tavern named The Prancing Pony, including a common room, kitchen, and cellar."</p>
+            <textarea name="userPrompt" rows="6">{{userPrompt}}</textarea>
+        </div>
+        {{/if}}
+
+        {{#if (eq step 2)}}
+        <div class="outline-review">
+            <h3>Generated Outline</h3>
+            <p><strong>{{outline.title}}</strong>: {{outline.description}}</p>
+            <ul>
+                {{#each outline.rooms}}
+                <li><strong>{{name}}</strong> ({{approximateSize}}): {{purpose}}</li>
+                {{/each}}
+            </ul>
+        </div>
+        <div class="svg-preview"
+            style="margin-top: 10px; background: #222; padding: 10px; text-align: center; border-radius: 5px; border: 1px solid #444;">
+            <h3>SVG Layout Preview</h3>
+            <div id="svg-container"
+                style="max-height: 400px; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+                {{{svg}}}
+            </div>
+            <p class="notes" style="margin-top: 5px;">This abstract layout will guide the image generation.</p>
+        </div>
+        {{/if}}
+
+        {{#if (eq step 3)}}
+        <div class="image-review" style="text-align: center;">
+            <h3>Final Rendered Map</h3>
+            <img src="data:image/jpeg;base64,{{imageBuffer}}"
+                style="max-width: 100%; max-height: 500px; border-radius: 5px; border: 1px solid #444; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+            <p class="notes" style="margin-top: 10px;">If approved, this will be imported as a Scene with walls and
+                lighting.</p>
+        </div>
+        {{/if}}
+    </div>
+
+    <footer class="sheet-footer flexrow" style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+        {{#if (gt step 1)}}
+        <button type="button" data-action="back"><i class="fas fa-arrow-left"></i> Back</button>
+        {{/if}}
+
+        {{#if (eq step 1)}}
+        <button type="button" data-action="next"><i class="fas fa-magic"></i> Generate Layout</button>
+        {{/if}}
+
+        {{#if (eq step 2)}}
+        <button type="button" data-action="next"><i class="fas fa-image"></i> Render Map</button>
+        {{/if}}
+
+        {{#if (eq step 3)}}
+        <button type="button" data-action="finish"><i class="fas fa-check"></i> Create Scene</button>
+        {{/if}}
+    </footer>
+</div>
