@@ -18,7 +18,9 @@
     "esmodules": [
         "scripts/module.js"
     ],
-    "styles": [],
+    "styles": [
+        "styles/vibe-scene-two.css"
+    ],
     "languages": [],
     "url": "https://github.com/shaneallen001/vibe-scene-two",
     "manifest": "https://github.com/shaneallen001/vibe-scene-two/releases/latest/download/module.json",

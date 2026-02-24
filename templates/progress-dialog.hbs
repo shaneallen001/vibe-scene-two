@@ -1,0 +1,16 @@
+<div class="progress-content">
+    <div class="progress-status">Generating...</div>
+
+    <div class="progress-log"></div>
+
+    {{#if hasSvg}}
+    <div class="silhouette-container">
+        {{{svgContent}}}
+    </div>
+    {{/if}}
+
+    <div class="progress-spinner">
+        <i class="fas fa-circle-notch"></i>
+        <span>Working on it...</span>
+    </div>
+</div>

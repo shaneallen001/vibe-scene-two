@@ -3,6 +3,7 @@ import { ScenePipeline } from "../services/pipeline.js";
 import { InpaintingPipeline } from "../services/inpainting-pipeline.js";
 import { VibeToast } from "../../../vibe-common/scripts/ui/toast-manager.js";
 import { SceneBuilder } from "../services/scene-builder.js";
+import { ProgressDialog } from "./progress-dialog.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -148,10 +149,11 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
     }
 
     /**
-     * Advance to the next generation step
+     * Advance to the next generation step.
+     * Closes this window and opens a ProgressDialog during long operations.
      */
     async _onNextStep(event, target) {
-        // Save prompt if we are on step 1
+        // ── Step 1 → Generate Outline + SVG ──
         if (this.step === 1) {
             const textarea = this.element.querySelector('textarea[name="userPrompt"]');
             if (textarea) this.userPrompt = textarea.value.trim();
@@ -164,31 +166,66 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
                 return;
             }
 
-            this.isGenerating = true;
-            this.render({ force: true });
-            this.showLoading("Generating Outline and SVG Layout...");
-            VibeToast.info("Brainstorming scene architecture...");
+            // Close this window and open progress dialog
+            this.close();
+
+            const progress = new ProgressDialog({ phase: 1 });
+            await progress.render({ force: true });
+
+            // Wait a tick for the DOM to be ready
+            await new Promise(r => setTimeout(r, 200));
+
+            progress.setStatus("Phase 1: Concept → Layout");
+            progress.addLog("Starting scene generation...", "highlight");
+            progress.addLog(`Prompt: "${this.userPrompt}"`);
+
             try {
+                progress.addLog("Brainstorming scene architecture...");
+                VibeToast.info("Brainstorming scene architecture...");
+
                 await this.pipeline.generateOutline(this.userPrompt, {
                     includeRoomLabels: this.includeRoomLabels
                 });
 
+                // Show generated outline data in the log
+                const outline = this.pipeline.state.outline;
+                if (outline) {
+                    progress.addLog(`Scene: "${outline.title}"`, "highlight");
+                    if (outline.description) {
+                        progress.addLog(outline.description);
+                    }
+                    progress.addLog(`Defined ${outline.rooms?.length || 0} rooms:`, "highlight");
+                    for (const room of (outline.rooms || [])) {
+                        progress.addLog(`  ◆ ${room.name} — ${room.purpose}`, "room-entry");
+                    }
+                }
+
+                progress.addLog("Drawing SVG layout boundaries...");
+                progress.setStatus("Drafting SVG cartography...");
                 VibeToast.info("Drawing SVG Layout boundaries...");
+
                 await this.pipeline.generateSvg();
-                this.step = 2; // Move to review outline
+                progress.addLog("SVG layout complete!", "highlight");
+
+                this.step = 2;
             } catch (e) {
                 VibeToast.error("Failed to generate layout: " + e.message);
+                progress.addLog(`ERROR: ${e.message}`, "highlight");
+                // Re-open generator on failure so user can retry
+                this.step = 1;
             } finally {
-                this.isGenerating = false;
-                this.hideLoading();
+                await progress.close();
+                // Small delay to ensure Foundry fully processes the close
+                await new Promise(r => setTimeout(r, 100));
                 this.render({ force: true });
             }
         }
+        // ── Step 2 → Render Final Image ──
         else if (this.step === 2) {
             const inpaintCheckbox = this.element.querySelector('input[name="useInpaintingPipeline"]');
             if (inpaintCheckbox) this.useInpaintingPipeline = inpaintCheckbox.checked;
 
-            // If toggled, swap the pipeline implementation but keep the state
+            // Swap pipeline if needed
             if (this.useInpaintingPipeline && !(this.pipeline instanceof InpaintingPipeline)) {
                 const oldState = this.pipeline.state;
                 this.pipeline = new InpaintingPipeline();
@@ -199,24 +236,40 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
                 this.pipeline.state = oldState;
             }
 
-            this.isGenerating = true;
-            this.render({ force: true });
+            // Close this window and open progress dialog with SVG silhouette
+            this.close();
+
+            const progress = new ProgressDialog({ phase: 2 });
+            await progress.render({ force: true });
+
+            await new Promise(r => setTimeout(r, 200));
 
             const msg = this.useInpaintingPipeline
-                ? "Rendering Final Map Image room-by-room (Inpainting). This may take a while..."
-                : "Rendering Final Map Image with Imagen 4. This may take a minute...";
+                ? "Rendering map room-by-room (Inpainting)..."
+                : "Rendering map with Imagen 4...";
 
-            this.showLoading(msg);
+            progress.setStatus(msg);
+            progress.addLog("Starting image diffusion process...", "highlight");
+            progress.addLog(msg);
             VibeToast.info("Starting map diffusion process...");
+
+            // Show the SVG silhouette with blinking rooms
+            if (this.pipeline.state.svg) {
+                progress.showSilhouette(this.pipeline.state.svg);
+                progress.addLog("Room layout loaded — watch for the magic ✨");
+            }
 
             try {
                 await this.pipeline.generateImage();
-                this.step = 3; // Move to review final image
+                progress.addLog("Image generation complete!", "highlight");
+                this.step = 3;
             } catch (e) {
                 VibeToast.error("Failed to render image: " + e.message);
+                progress.addLog(`ERROR: ${e.message}`, "highlight");
+                this.step = 2;
             } finally {
-                this.isGenerating = false;
-                this.hideLoading();
+                await progress.close();
+                await new Promise(r => setTimeout(r, 100));
                 this.render({ force: true });
             }
         }

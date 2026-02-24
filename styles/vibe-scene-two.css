@@ -1,0 +1,353 @@
+/*
+ * vibe-scene-two.css
+ * =========================================================
+ * Styles for the Vibe Scene Two generation wizard.
+ * =========================================================
+ */
+
+/* ─── Step 1: Prompt-First Layout ────────────────────────── */
+.vibe-scene-two .step1-prompt-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vibe-scene-two .step1-prompt-area textarea {
+    width: 100%;
+    min-height: 180px;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 12px;
+    border: 1px solid #555;
+    border-radius: var(--vibe-radius-md, 6px);
+    background: rgba(0, 0, 0, 0.4);
+    color: #eee;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.vibe-scene-two .step1-prompt-area textarea:focus {
+    border-color: var(--vibe-primary, #667eea);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+.vibe-scene-two .step1-prompt-area textarea::placeholder {
+    color: #888;
+    font-style: italic;
+}
+
+.vibe-scene-two .step1-prompt-area .checkbox-group {
+    margin-top: 5px;
+}
+
+.vibe-scene-two .step1-prompt-area .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 13px;
+    color: #ccc;
+}
+
+.vibe-scene-two .step1-prompt-area .step1-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    align-items: stretch;
+}
+
+.vibe-scene-two .step1-prompt-area .step1-actions .randomize-btn {
+    padding: 10px 14px;
+    font-size: 15px;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #555;
+    border-radius: var(--vibe-radius-md, 6px);
+    color: var(--color-text-light-highlight, #f0e0c0);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.vibe-scene-two .step1-prompt-area .step1-actions .randomize-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--vibe-primary, #667eea);
+}
+
+.vibe-scene-two .step1-prompt-area .step1-actions .generate-btn {
+    flex: 1;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    background: var(--vibe-gradient, linear-gradient(135deg, #667eea, #764ba2));
+    color: white;
+    border: none;
+    border-radius: var(--vibe-radius-md, 6px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.vibe-scene-two .step1-prompt-area .step1-actions .generate-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ─── Step 2: Horizontal Split Layout ────────────────────── */
+.vibe-scene-two .step2-layout {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+    min-height: 400px;
+}
+
+.vibe-scene-two .step2-layout .svg-panel {
+    flex: 2;
+    background: #1a1a1a;
+    border-radius: var(--vibe-radius-md, 6px);
+    border: 1px solid #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.vibe-scene-two .step2-layout .svg-panel svg {
+    max-width: 100%;
+    max-height: 60vh;
+    height: auto;
+    width: auto;
+}
+
+.vibe-scene-two .step2-layout .controls-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 200px;
+}
+
+.vibe-scene-two .step2-layout .controls-panel h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--color-text-light-highlight, #f0e0c0);
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .notes {
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .checkbox-group {
+    margin-top: 8px;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .checkbox-group label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.4;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .action-buttons button {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: var(--vibe-radius-md, 6px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .render-btn {
+    background: var(--vibe-gradient, linear-gradient(135deg, #667eea, #764ba2));
+    color: white;
+    border: none;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .render-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.vibe-scene-two .step2-layout .controls-panel .back-btn {
+    background: transparent;
+    color: #ccc;
+    border: 1px solid #555;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .back-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #888;
+}
+
+/* ─── Progress Dialog ────────────────────────────────────── */
+.vibe-progress-dialog .progress-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.vibe-progress-dialog .progress-status {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-light-highlight, #f0e0c0);
+    text-align: center;
+}
+
+.vibe-progress-dialog .progress-log {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #444;
+    border-radius: var(--vibe-radius-md, 6px);
+    padding: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #aaa;
+}
+
+.vibe-progress-dialog .progress-log .log-entry {
+    opacity: 0;
+    animation: logFadeIn 0.4s ease forwards;
+}
+
+.vibe-progress-dialog .progress-log .log-entry.highlight {
+    color: var(--vibe-primary, #667eea);
+    font-weight: 600;
+}
+
+.vibe-progress-dialog .progress-log .log-entry.room-entry {
+    color: #e8c87a;
+}
+
+@keyframes logFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ─── SVG Silhouette Room Blink ──────────────────────────── */
+.vibe-progress-dialog .silhouette-container {
+    position: relative;
+    background: #b8876b;
+    border-radius: var(--vibe-radius-md, 6px);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid #444;
+}
+
+.vibe-progress-dialog .silhouette-container svg {
+    max-width: 100%;
+    max-height: 50vh;
+    width: auto;
+    height: auto;
+}
+
+/* All room shapes start as dark silhouettes */
+.vibe-progress-dialog .silhouette-container svg rect[data-room-id],
+.vibe-progress-dialog .silhouette-container svg polygon[data-room-id],
+.vibe-progress-dialog .silhouette-container svg circle[data-room-id] {
+    fill: #1a1205 !important;
+    stroke: #0f0b03 !important;
+    stroke-width: 3;
+    rx: 8;
+    ry: 8;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+/* Blink animation — highlights a room momentarily */
+@keyframes roomBlink {
+    0% {
+        fill: #1a1205;
+        stroke: #0f0b03;
+    }
+
+    15% {
+        fill: #f5ecd0;
+        stroke: #d4a824;
+        stroke-width: 4;
+    }
+
+    50% {
+        fill: #f5ecd0;
+        stroke: #d4a824;
+        stroke-width: 4;
+    }
+
+    100% {
+        fill: #1a1205;
+        stroke: #0f0b03;
+        stroke-width: 3;
+    }
+}
+
+.vibe-progress-dialog .silhouette-container svg [data-room-id].room-blinking {
+    animation: roomBlink 1.8s ease-in-out infinite;
+}
+
+/* Hide text labels and line elements in silhouette mode */
+.vibe-progress-dialog .silhouette-container svg text,
+.vibe-progress-dialog .silhouette-container svg line {
+    display: none !important;
+}
+
+/* ─── Progress Spinner ───────────────────────────────────── */
+.vibe-progress-dialog .progress-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px;
+    color: #999;
+    font-size: 13px;
+}
+
+.vibe-progress-dialog .progress-spinner i {
+    animation: spin 1.2s linear infinite;
+    color: var(--vibe-primary, #667eea);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

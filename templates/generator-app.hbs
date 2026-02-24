@@ -1,58 +1,55 @@
 <div class="vibe-scene-two-app">
-    <div class="vibe-stepper">
-        <div class="step {{#if (eq step 1)}}active{{/if}}">1. Concept</div>
-        <div class="step {{#if (eq step 2)}}active{{/if}}">2. Outline & Layout</div>
-        <div class="step {{#if (eq step 3)}}active{{/if}}">3. Final Review</div>
-    </div>
-
-    <hr>
 
     <div class="step-content">
         {{#if (eq step 1)}}
-        <div class="form-group stacked">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <label style="margin: 0;">What kind of scene do you want to generate?</label>
-                <button type="button" data-action="randomize" title="Random scene concept"
-                    style="padding: 2px 8px; font-size: 0.85em; cursor: pointer;"><i class="fas fa-dice"></i></button>
+        <div class="step1-prompt-area">
+            <textarea name="userPrompt" rows="10"
+                placeholder="Describe the biome, interior/exterior, specific rooms, and overall vibe. E.g., &quot;A cozy interior of a fantasy tavern named The Prancing Pony, including a common room, kitchen, and cellar.&quot;">{{userPrompt}}</textarea>
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" name="includeRoomLabels" {{#if includeRoomLabels}}checked{{/if}}>
+                    Draw room names directly on the map image
+                </label>
             </div>
-            <p class="notes">Describe the biome, interior/exterior, specific rooms, and overall vibe. E.g., "A cozy
-                interior of a fantasy tavern named The Prancing Pony, including a common room, kitchen, and cellar."</p>
-            <textarea name="userPrompt" rows="6">{{userPrompt}}</textarea>
+            <div class="step1-actions">
+                <button type="button" data-action="randomize" class="randomize-btn" title="Random scene concept">
+                    <i class="fas fa-dice"></i>
+                </button>
+                <button type="button" data-action="next" class="generate-btn">
+                    <i class="fas fa-magic"></i> Generate Layout
+                </button>
+            </div>
         </div>
-        <div class="form-group checkbox-group" style="margin-top: 15px;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
-                <input type="checkbox" name="includeRoomLabels" {{#if includeRoomLabels}}checked{{/if}}>
-                Draw room names directly on the map image
-            </label>
-            <p class="notes" style="margin-left: 24px;">If unchecked, room names will only appear as clickable Journals.
-            </p>
-        </div>
-
         {{/if}}
 
         {{#if (eq step 2)}}
-        {{#unless isGenerating}}
-        <div class="svg-preview"
-            style="margin-top: 10px; background: #222; padding: 10px; text-align: center; border-radius: 5px; border: 1px solid #444; flex-grow: 1; display: flex; flex-direction: column;">
-            <h3>SVG Layout Preview</h3>
-            <div id="svg-container"
-                style="height: 60vh; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+        <div class="step2-layout">
+            <div class="svg-panel" id="svg-container">
                 {{{svg}}}
             </div>
-            <p class="notes" style="margin-top: auto;">This abstract layout will guide the image generation.</p>
+            <div class="controls-panel">
+                <h3>SVG Layout Preview</h3>
+                <p class="notes">This abstract layout will guide the image generation. Review the room
+                    placement before rendering.</p>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" name="useInpaintingPipeline" {{#if useInpaintingPipeline}}checked{{/if}}>
+                        Experimental: Inpainting Pipeline (Room-by-Room)
+                    </label>
+                </div>
+                <div class="action-buttons">
+                    <button type="button" data-action="next" class="render-btn">
+                        <i class="fas fa-image"></i> Render Map
+                    </button>
+                    <button type="button" data-action="back" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="form-group checkbox-group" style="margin-top: 15px;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
-                <input type="checkbox" name="useInpaintingPipeline" {{#if useInpaintingPipeline}}checked{{/if}}>
-                Experimental: Use Inpainting Pipeline (Room-by-Room generation)
-            </label>
-            <p class="notes" style="margin-left: 24px;">Uses individual room SVG masks to guide the composition.</p>
-        </div>
-        {{/unless}}
         {{/if}}
 
         {{#if (eq step 3)}}
-        {{#unless isGenerating}}
         <div class="image-review" style="text-align: center; display: flex; flex-direction: column;">
             <h3>Final Rendered Map</h3>
             <img src="data:image/jpeg;base64,{{imageBuffer}}"
@@ -60,25 +57,13 @@
             <p class="notes" style="margin-top: auto;">If approved, this will be imported as a Scene with walls and
                 lighting.</p>
         </div>
-        {{/unless}}
         {{/if}}
     </div>
 
+    {{#if (eq step 3)}}
     <footer class="sheet-footer flexrow" style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
-        {{#if (gt step 1)}}
         <button type="button" data-action="back"><i class="fas fa-arrow-left"></i> Back</button>
-        {{/if}}
-
-        {{#if (eq step 1)}}
-        <button type="button" data-action="next"><i class="fas fa-magic"></i> Generate Layout</button>
-        {{/if}}
-
-        {{#if (eq step 2)}}
-        <button type="button" data-action="next"><i class="fas fa-image"></i> Render Map</button>
-        {{/if}}
-
-        {{#if (eq step 3)}}
         <button type="button" data-action="finish"><i class="fas fa-check"></i> Create Scene</button>
-        {{/if}}
     </footer>
+    {{/if}}
 </div>
