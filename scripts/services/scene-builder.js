@@ -17,6 +17,11 @@ export class SceneBuilder {
         // 1. Save Image to server
         const imagePath = await this._saveImageBuffer(state.imageBuffer, state.outline.title);
 
+        if (state.layoutImageBuffer) {
+            await this._saveImageBuffer(state.layoutImageBuffer, state.outline.title + "-layout");
+            console.log("SceneBuilder | Saved companion layout image.");
+        }
+
         // 2. Determine Map dimensions (Load the image to get native resolution)
         const dimensions = await new Promise((resolve) => {
             const img = new Image();
@@ -53,8 +58,8 @@ export class SceneBuilder {
 
         console.log(`SceneBuilder | Base scene created: ${scene.id}`);
 
-        // 4. Parse SVG to extract logical walls, lights, and notes
-        await this._addElementsFromSvgAndOutline(scene, state.svg, state.outline, dimensions.width, dimensions.height);
+        // 4. Parse SVG and potentially AI Vision data to extract logical walls, lights, and notes
+        await this._addElementsFromSvgAndState(scene, state, dimensions.width, dimensions.height);
 
         return scene;
     }
@@ -99,9 +104,12 @@ export class SceneBuilder {
     }
 
     /**
-     * Parse the abstract SVG to extract approximate locations for walls and rooms.
+     * Parse the abstract SVG (and AI vision data if present) to extract locations for walls, journals, and lights.
      */
-    async _addElementsFromSvgAndOutline(scene, svgString, outline, targetW, targetH) {
+    async _addElementsFromSvgAndState(scene, state, targetW, targetH) {
+        const svgString = state.svg;
+        const outline = state.outline;
+
         // We create a temporary hidden DOM element to leverage browser SVG parsing
         const parser = new DOMParser();
         const doc = parser.parseFromString(svgString, "image/svg+xml");
@@ -138,6 +146,9 @@ export class SceneBuilder {
         const lightsData = [];
         const notesData = [];
         const journalEntries = [];
+        let doorsCount = 0;
+
+
 
         // Parse Rectangles (Assuming rooms are mostly rects)
         const rects = svgElement.querySelectorAll("rect");
@@ -151,7 +162,7 @@ export class SceneBuilder {
 
             if (w === 0 || h === 0) return;
 
-            // 1. Walls format: c: [x1, y1, x2, y2]
+            // 1. Create abstract walls from SVG rects format: c: [x1, y1, x2, y2]
             wallsData.push({ c: [x, y, x + w, y] });
             wallsData.push({ c: [x + w, y, x + w, y + h] });
             wallsData.push({ c: [x + w, y + h, x, y + h] });
@@ -204,7 +215,6 @@ export class SceneBuilder {
 
         // Parse Lines as Doors
         const lines = svgElement.querySelectorAll("line");
-        let doorsCount = 0;
         lines.forEach(line => {
             const x1 = (Number(line.getAttribute("x1")) || 0) * scaleX + offsetX;
             const y1 = (Number(line.getAttribute("y1")) || 0) * scaleY + offsetY;

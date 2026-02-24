@@ -75,7 +75,10 @@ export class ScenePipeline {
 
         try {
             const finalPrompt = await this.imageGenerator.generateFinalPrompt(this.state.outline, this.state.options);
-            this.state.imageBuffer = await this.imageGenerator.generateImage(finalPrompt, this.state.svg);
+            const result = await this.imageGenerator.generateImage(finalPrompt, this.state.svg);
+            this.state.imageBuffer = result.finalImage;
+            this.state.layoutImageBuffer = result.layoutImage;
+
             return this.state.imageBuffer;
         } catch (error) {
             console.error("ScenePipeline | Phase 3 Failed:", error);

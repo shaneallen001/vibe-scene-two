@@ -17,6 +17,7 @@ export class SceneImageGenerator {
 You have an outline of a scene/dungeon.
 Your goal is to write a single, highly detailed, comma-separated paragraph prompt to generate a realistic, high-quality, high-resolution rendering of this map.
 Do not describe UI elements, grids, or character tokens. Describe the textures, lighting, atmosphere, and layout.
+CRITICAL PERSPECTIVE RULE: You MUST enforce a STRICTLY flat, top-down orthographic perspective. Do NOT generate roofs. The viewer must be looking directly down into the interior of the rooms. Do not use 2.5D or isometric angles.
 ${labelsRule}
 Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
     }
@@ -144,7 +145,10 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
         }
 
         if (b64) {
-            return b64;
+            return {
+                finalImage: b64,
+                layoutImage: base64Jpeg
+            };
         } else {
             console.error("SceneImageGenerator | Raw response:", data);
             throw new Error("No image data returned from image generation API.");

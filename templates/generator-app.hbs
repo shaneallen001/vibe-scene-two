@@ -10,7 +10,11 @@
     <div class="step-content">
         {{#if (eq step 1)}}
         <div class="form-group stacked">
-            <label>What kind of scene do you want to generate?</label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="margin: 0;">What kind of scene do you want to generate?</label>
+                <button type="button" data-action="randomize" title="Random scene concept"
+                    style="padding: 2px 8px; font-size: 0.85em; cursor: pointer;"><i class="fas fa-dice"></i></button>
+            </div>
             <p class="notes">Describe the biome, interior/exterior, specific rooms, and overall vibe. E.g., "A cozy
                 interior of a fantasy tavern named The Prancing Pony, including a common room, kitchen, and cellar."</p>
             <textarea name="userPrompt" rows="6">{{userPrompt}}</textarea>
@@ -23,37 +27,40 @@
             <p class="notes" style="margin-left: 24px;">If unchecked, room names will only appear as clickable Journals.
             </p>
         </div>
+
         {{/if}}
 
         {{#if (eq step 2)}}
-        <div class="outline-review">
-            <h3>Generated Outline</h3>
-            <p><strong>{{outline.title}}</strong>: {{outline.description}}</p>
-            <ul>
-                {{#each outline.rooms}}
-                <li><strong>{{name}}</strong> ({{approximateSize}}): {{purpose}}</li>
-                {{/each}}
-            </ul>
-        </div>
+        {{#unless isGenerating}}
         <div class="svg-preview"
-            style="margin-top: 10px; background: #222; padding: 10px; text-align: center; border-radius: 5px; border: 1px solid #444;">
+            style="margin-top: 10px; background: #222; padding: 10px; text-align: center; border-radius: 5px; border: 1px solid #444; flex-grow: 1; display: flex; flex-direction: column;">
             <h3>SVG Layout Preview</h3>
             <div id="svg-container"
-                style="max-height: 400px; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+                style="height: 60vh; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
                 {{{svg}}}
             </div>
-            <p class="notes" style="margin-top: 5px;">This abstract layout will guide the image generation.</p>
+            <p class="notes" style="margin-top: auto;">This abstract layout will guide the image generation.</p>
         </div>
+        <div class="form-group checkbox-group" style="margin-top: 15px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
+                <input type="checkbox" name="useInpaintingPipeline" {{#if useInpaintingPipeline}}checked{{/if}}>
+                Experimental: Use Inpainting Pipeline (Room-by-Room generation)
+            </label>
+            <p class="notes" style="margin-left: 24px;">Uses individual room SVG masks to guide the composition.</p>
+        </div>
+        {{/unless}}
         {{/if}}
 
         {{#if (eq step 3)}}
-        <div class="image-review" style="text-align: center;">
+        {{#unless isGenerating}}
+        <div class="image-review" style="text-align: center; display: flex; flex-direction: column;">
             <h3>Final Rendered Map</h3>
             <img src="data:image/jpeg;base64,{{imageBuffer}}"
-                style="max-width: 100%; max-height: 500px; border-radius: 5px; border: 1px solid #444; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
-            <p class="notes" style="margin-top: 10px;">If approved, this will be imported as a Scene with walls and
+                style="max-width: 100%; height: 60vh; object-fit: contain; border-radius: 5px; border: 1px solid #444; box-shadow: 0 4px 8px rgba(0,0,0,0.5); margin-bottom: 15px;">
+            <p class="notes" style="margin-top: auto;">If approved, this will be imported as a Scene with walls and
                 lighting.</p>
         </div>
+        {{/unless}}
         {{/if}}
     </div>
 
