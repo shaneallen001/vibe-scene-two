@@ -260,10 +260,34 @@ export class SceneBuilder {
         }
 
         // Embed documents into scene
-        if (wallsData.length > 0) await scene.createEmbeddedDocuments("Wall", wallsData);
+        if (wallsData.length > 0 && state.options?.generateWalls !== false) {
+            await scene.createEmbeddedDocuments("Wall", wallsData);
+        } else if (state.options?.generateWalls === false) {
+            console.log("SceneBuilder | Wall generation disabled by user, skipping.");
+        }
         if (lightsData.length > 0) await scene.createEmbeddedDocuments("AmbientLight", lightsData);
         if (notesData.length > 0) await scene.createEmbeddedDocuments("Note", notesData);
 
-        console.log(`SceneBuilder | Placed ${wallsData.length} wall segments (${doorsCount || 0} doors), ${lightsData.length} lights, and ${notesData.length} journals.`);
+        console.log(`SceneBuilder | Placed ${state.options?.generateWalls !== false ? wallsData.length : 0} wall segments (${doorsCount || 0} doors), ${lightsData.length} lights, and ${notesData.length} journals.`);
+
+        // If tile overlay is enabled, add the layout image as a Tile
+        if (state.options?.includeTileOverlay && state.layoutImageBuffer) {
+            try {
+                const tilePath = await this._saveImageBuffer(state.layoutImageBuffer, state.outline.title + "-tile-overlay");
+                await scene.createEmbeddedDocuments("Tile", [{
+                    texture: { src: tilePath },
+                    x: offsetX,
+                    y: offsetY,
+                    width: targetW,
+                    height: targetH,
+                    overhead: false,
+                    alpha: 0.5,
+                    z: 100
+                }]);
+                console.log("SceneBuilder | Added layout image as tile overlay.");
+            } catch (e) {
+                console.warn("SceneBuilder | Failed to add tile overlay:", e.message);
+            }
+        }
     }
 }

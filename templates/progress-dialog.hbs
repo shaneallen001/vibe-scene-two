@@ -1,4 +1,14 @@
 <div class="progress-content">
+    <div class="progress-header">
+        <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-phase-badge">
+            {{#if hasSvg}}<i class="fas fa-paint-brush"></i> Rendering{{else}}<i class="fas fa-brain"></i>
+            Designing{{/if}}
+        </div>
+    </div>
+
     <div class="progress-status">Generating...</div>
 
     <div class="progress-log"></div>
@@ -10,7 +20,7 @@
     {{/if}}
 
     <div class="progress-spinner">
-        <i class="fas fa-circle-notch"></i>
+        <div class="spinner-ring"></div>
         <span>Working on it...</span>
     </div>
 </div>

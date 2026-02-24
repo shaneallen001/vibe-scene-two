@@ -5,12 +5,6 @@
         <div class="step1-prompt-area">
             <textarea name="userPrompt" rows="10"
                 placeholder="Describe the biome, interior/exterior, specific rooms, and overall vibe. E.g., &quot;A cozy interior of a fantasy tavern named The Prancing Pony, including a common room, kitchen, and cellar.&quot;">{{userPrompt}}</textarea>
-            <div class="checkbox-group">
-                <label>
-                    <input type="checkbox" name="includeRoomLabels" {{#if includeRoomLabels}}checked{{/if}}>
-                    Draw room names directly on the map image
-                </label>
-            </div>
             <div class="step1-actions">
                 <button type="button" data-action="randomize" class="randomize-btn" title="Random scene concept">
                     <i class="fas fa-dice"></i>
@@ -31,12 +25,40 @@
                 <h3>SVG Layout Preview</h3>
                 <p class="notes">This abstract layout will guide the image generation. Review the room
                     placement before rendering.</p>
+
                 <div class="checkbox-group">
                     <label>
+                        <input type="checkbox" name="generateWalls" {{#if generateWalls}}checked{{/if}}>
+                        Generate Walls
+                    </label>
+                    <label>
+                        <input type="checkbox" name="includeTileOverlay" {{#if includeTileOverlay}}checked{{/if}}>
+                        Include layout as tile overlay
+                    </label>
+                    <label>
+                        <input type="checkbox" name="removeRoomLabels" {{#if removeRoomLabels}}checked{{/if}}>
+                        Remove room names from final image
+                    </label>
+                    <label>
                         <input type="checkbox" name="useInpaintingPipeline" {{#if useInpaintingPipeline}}checked{{/if}}>
-                        Experimental: Inpainting Pipeline (Room-by-Room)
+                        Experimental: Inpainting Pipeline
                     </label>
                 </div>
+
+                {{#if rooms.length}}
+                <div class="room-list">
+                    <h4>Locations</h4>
+                    <ul>
+                        {{#each rooms}}
+                        <li>
+                            <span class="room-name">{{this.name}}</span>
+                            {{#if this.purpose}}<span class="room-purpose">{{this.purpose}}</span>{{/if}}
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+                {{/if}}
+
                 <div class="action-buttons">
                     <button type="button" data-action="next" class="render-btn">
                         <i class="fas fa-image"></i> Render Map

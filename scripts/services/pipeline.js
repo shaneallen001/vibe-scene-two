@@ -75,7 +75,7 @@ export class ScenePipeline {
 
         try {
             const finalPrompt = await this.imageGenerator.generateFinalPrompt(this.state.outline, this.state.options);
-            const result = await this.imageGenerator.generateImage(finalPrompt, this.state.svg);
+            const result = await this.imageGenerator.generateImage(finalPrompt, this.state.svg, undefined, this.state.options);
             this.state.imageBuffer = result.finalImage;
             this.state.layoutImageBuffer = result.layoutImage;
 

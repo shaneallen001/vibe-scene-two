@@ -13,7 +13,9 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
         this.pipeline = new ScenePipeline();
         this.step = 1;
         this.userPrompt = "";
-        this.includeRoomLabels = false;
+        this.generateWalls = true;
+        this.includeTileOverlay = false;
+        this.removeRoomLabels = true;
         this.useInpaintingPipeline = false;
         this.isGenerating = false;
     }
@@ -48,10 +50,13 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
         return {
             step: this.step,
             userPrompt: this.userPrompt,
-            includeRoomLabels: this.includeRoomLabels,
+            generateWalls: this.generateWalls,
+            includeTileOverlay: this.includeTileOverlay,
+            removeRoomLabels: this.removeRoomLabels,
             useInpaintingPipeline: this.useInpaintingPipeline,
             isGenerating: this.isGenerating,
             outline: this.pipeline.state.outline,
+            rooms: this.pipeline.state.outline?.rooms || [],
             svg: this.pipeline.state.svg,
             imageBuffer: this.pipeline.state.imageBuffer
         };
@@ -158,9 +163,6 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
             const textarea = this.element.querySelector('textarea[name="userPrompt"]');
             if (textarea) this.userPrompt = textarea.value.trim();
 
-            const checkbox = this.element.querySelector('input[name="includeRoomLabels"]');
-            if (checkbox) this.includeRoomLabels = checkbox.checked;
-
             if (!this.userPrompt) {
                 VibeToast.warn("Please enter a concept for the scene.");
                 return;
@@ -183,9 +185,7 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
                 progress.addLog("Brainstorming scene architecture...");
                 VibeToast.info("Brainstorming scene architecture...");
 
-                await this.pipeline.generateOutline(this.userPrompt, {
-                    includeRoomLabels: this.includeRoomLabels
-                });
+                await this.pipeline.generateOutline(this.userPrompt);
 
                 // Show generated outline data in the log
                 const outline = this.pipeline.state.outline;
@@ -222,8 +222,26 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
         }
         // ── Step 2 → Render Final Image ──
         else if (this.step === 2) {
+            // Read all Step 2 toggles
+            const wallsCheckbox = this.element.querySelector('input[name="generateWalls"]');
+            if (wallsCheckbox) this.generateWalls = wallsCheckbox.checked;
+
+            const tileCheckbox = this.element.querySelector('input[name="includeTileOverlay"]');
+            if (tileCheckbox) this.includeTileOverlay = tileCheckbox.checked;
+
+            const labelsCheckbox = this.element.querySelector('input[name="removeRoomLabels"]');
+            if (labelsCheckbox) this.removeRoomLabels = labelsCheckbox.checked;
+
             const inpaintCheckbox = this.element.querySelector('input[name="useInpaintingPipeline"]');
             if (inpaintCheckbox) this.useInpaintingPipeline = inpaintCheckbox.checked;
+
+            // Pass options into pipeline state so downstream stages can use them
+            this.pipeline.state.options = {
+                ...this.pipeline.state.options,
+                generateWalls: this.generateWalls,
+                includeTileOverlay: this.includeTileOverlay,
+                removeRoomLabels: this.removeRoomLabels
+            };
 
             // Swap pipeline if needed
             if (this.useInpaintingPipeline && !(this.pipeline instanceof InpaintingPipeline)) {
@@ -257,6 +275,43 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
             if (this.pipeline.state.svg) {
                 progress.showSilhouette(this.pipeline.state.svg);
                 progress.addLog("Room layout loaded — watch for the magic ✨");
+            }
+
+            // If inpainting, wire per-room progress callbacks
+            if (this.useInpaintingPipeline && this.pipeline.onRoomProgress !== undefined) {
+                const rooms = this.pipeline.state.outline?.rooms || [];
+                this.pipeline.onRoomProgress = (roomId, index, total, label, extra) => {
+                    if (roomId === "__done__") {
+                        progress.markAllRoomsComplete();
+                        progress.addLog("All rooms painted! ✅", "highlight");
+                        VibeToast.info("All rooms rendered successfully!");
+                        return;
+                    }
+                    if (roomId === "__retry__") {
+                        progress.addLog(`  ↻ Retrying ${label} (attempt ${extra})...`, "room-entry");
+                        progress.setStatus(`Retrying ${label} (attempt ${extra})...`);
+                        return;
+                    }
+                    if (roomId === "__validated__") {
+                        progress.addLog(`  ✓ ${label} passed QA: ${extra}`, "highlight");
+                        return;
+                    }
+                    if (roomId === "__failed__") {
+                        progress.addLog(`  ✗ ${label} failed QA: ${extra}`, "room-entry");
+                        return;
+                    }
+                    if (roomId === "__accepted__") {
+                        progress.addLog(`  ⚠ ${label} accepted after max retries`, "room-entry");
+                        return;
+                    }
+
+                    const roomDef = rooms.find(r => String(r.id) === String(roomId));
+                    const roomLabel = roomDef?.name || roomId;
+                    progress.highlightRoom(roomId);
+                    progress.addLog(`Painting room ${index + 1}/${total}: ${roomLabel}...`, "room-entry");
+                    progress.setStatus(`Inpainting room ${index + 1}/${total}: ${roomLabel}`);
+                    VibeToast.info(`Painting room ${index + 1}/${total}: ${roomLabel}...`);
+                };
             }
 
             try {

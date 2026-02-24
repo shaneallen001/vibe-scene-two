@@ -8,11 +8,7 @@ export class SvgGenerator {
         this.apiKey = apiKey;
     }
 
-    getSystemPrompt(options = {}) {
-        const labelsRule = options.includeRoomLabels
-            ? "- Add simple text labels in the center of rooms to identify them. Text should be white or high contrast."
-            : "- DO NOT add any text labels or room names. The layout must be purely visual/structural without words.";
-
+    getSystemPrompt() {
         return `You are an expert cartographer building a top-down, 2D map layout in SVG format for a virtual tabletop.
 You will be given a textual outline of the scene describing rooms and their purposes.
 Your goal is to generate ONLY a valid, self-contained SVG string that visually represents this layout.
@@ -21,10 +17,23 @@ Rules for the SVG:
 - Use a dark background color (e.g., #111111).
 - Use distinct, easily identifiable solid colors for different rooms or areas (e.g., #445566, #554433), or thematic hex codes.
 - ONLY draw the macro architectural layout of the rooms and walls. DO NOT draw small props or furniture (no beds, pillows, desks, tables, cauldrons, etc.) because these shapes will automatically be converted into physical walls by the game engine.
-- Draw rectangles, polygons, or circles for rooms.
+- Draw rectangles for rooms (use <rect> elements). Avoid <polygon> or <circle> unless absolutely necessary.
 - IMPORTANT: For each room element (rect, polygon, circle), you MUST include a \`data-room-id\` attribute that EXACTLY matches the \`id\` field of the room from the SCENE OUTLINE JSON.
-- Indicate doors, passages, or openings between connecting rooms. Draw these opening indicators using thick <line> elements (e.g., stroke="white" or stroke="brown" with stroke-width="8") that bridge the adjoining walls. This lets the image generation process know where it is open vs closed.
-${labelsRule}
+
+LAYOUT RULES:
+- Adjacent rooms MUST share a wall — their edges should touch exactly (e.g., room A's right edge aligns with room B's left edge at the same x coordinate). This is how real dungeon floorplans work.
+- Rooms MUST NOT overlap — meaning one room's rectangle must never extend INTO another room's interior area. Edges touching is correct; areas overlapping is not.
+- Pack rooms tightly by sharing edges. Think of it like puzzle pieces fitting together, NOT boxes with gaps between them.
+
+DOOR RULES — CORRECT ORIENTATION:
+- Doors are drawn as thick <line> elements (stroke="white" or stroke="#8B4513", stroke-width="8") placed along the shared edge between two touching rooms.
+- A door <line> MUST be PARALLEL to the wall it sits on:
+  • If two rooms share a VERTICAL edge (rooms side by side left-right), the door line must be VERTICAL: x1 = x2, y1 ≠ y2.
+  • If two rooms share a HORIZONTAL edge (rooms stacked top-bottom), the door line must be HORIZONTAL: y1 = y2, x1 ≠ x2.
+- The door line should be centered on the shared edge and be shorter than the wall (about 40-80 units long).
+- NEVER draw a door perpendicular to the wall. A door on a vertical shared edge = vertical line. A door on a horizontal shared edge = horizontal line.
+
+- Add simple text labels in the center of rooms to identify them. Text should be white or high contrast.
 - Ensure the viewBox is appropriately sized (e.g., "0 0 1000 1000").
 - No markdown formatting wrappers like \`\`\`svg or HTML wrappers. Just output the raw <svg>...</svg> element.`;
     }
@@ -34,7 +43,7 @@ ${labelsRule}
 
         // Convert outline JSON to a clean string format for the prompt
         const outlineContext = JSON.stringify(outline, null, 2);
-        const fullPrompt = `${this.getSystemPrompt(options)}\n\nSCENE OUTLINE:\n${outlineContext}`;
+        const fullPrompt = `${this.getSystemPrompt()}\n\nSCENE OUTLINE:\n${outlineContext}`;
 
         try {
             let svg = await callGemini({

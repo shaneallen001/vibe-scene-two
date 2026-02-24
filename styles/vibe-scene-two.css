@@ -37,20 +37,6 @@
     font-style: italic;
 }
 
-.vibe-scene-two .step1-prompt-area .checkbox-group {
-    margin-top: 5px;
-}
-
-.vibe-scene-two .step1-prompt-area .checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-weight: normal;
-    font-size: 13px;
-    color: #ccc;
-}
-
 .vibe-scene-two .step1-prompt-area .step1-actions {
     display: flex;
     gap: 8px;
@@ -148,20 +134,82 @@
 }
 
 .vibe-scene-two .step2-layout .controls-panel .checkbox-group {
-    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
 }
 
 .vibe-scene-two .step2-layout .controls-panel .checkbox-group label {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
     cursor: pointer;
     font-weight: normal;
     font-size: 13px;
     color: #ccc;
     line-height: 1.4;
+    padding: 3px 0;
 }
 
+.vibe-scene-two .step2-layout .controls-panel .checkbox-group label input[type="checkbox"] {
+    accent-color: var(--vibe-primary, #667eea);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* ─── Room List ──────────────────────────────────────────── */
+.vibe-scene-two .step2-layout .controls-panel .room-list {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #3a3a3a;
+    border-radius: var(--vibe-radius-md, 6px);
+    padding: 10px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .room-list h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-light-highlight, #f0e0c0);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .room-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .room-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 2px solid var(--vibe-primary, #667eea);
+}
+
+.vibe-scene-two .step2-layout .controls-panel .room-list .room-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ddd;
+}
+
+.vibe-scene-two .step2-layout .controls-panel .room-list .room-purpose {
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+}
+
+/* ─── Step 2 Action Buttons ──────────────────────────────── */
 .vibe-scene-two .step2-layout .controls-panel .action-buttons {
     display: flex;
     flex-direction: column;
@@ -204,37 +252,118 @@
     border-color: #888;
 }
 
-/* ─── Progress Dialog ────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   Progress Dialog — Modern Redesign
+   ═══════════════════════════════════════════════════════════ */
+
 .vibe-progress-dialog .progress-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 10px 0;
+    gap: 16px;
+    padding: 8px 0;
 }
 
-.vibe-progress-dialog .progress-status {
-    font-size: 15px;
+/* ─── Header & Progress Bar ──────────────────────────────── */
+.vibe-progress-dialog .progress-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vibe-progress-dialog .progress-bar-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.vibe-progress-dialog .progress-bar-fill {
+    height: 100%;
+    width: 40%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+    background-size: 200% 100%;
+    animation: progressShimmer 2s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+    0% {
+        transform: translateX(-100%);
+        background-position: 0% 0%;
+    }
+
+    50% {
+        background-position: 100% 0%;
+    }
+
+    100% {
+        transform: translateX(250%);
+        background-position: 0% 0%;
+    }
+}
+
+.vibe-progress-dialog .progress-phase-badge {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    gap: 6px;
+    padding: 4px 14px;
+    font-size: 11px;
     font-weight: 600;
-    color: var(--color-text-light-highlight, #f0e0c0);
-    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.25);
+    border-radius: 20px;
 }
 
+.vibe-progress-dialog .progress-phase-badge i {
+    font-size: 10px;
+    color: var(--vibe-primary, #667eea);
+}
+
+/* ─── Status Text ────────────────────────────────────────── */
+.vibe-progress-dialog .progress-status {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f0f0f0;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+}
+
+/* ─── Log Area ───────────────────────────────────────────── */
 .vibe-progress-dialog .progress-log {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid #444;
-    border-radius: var(--vibe-radius-md, 6px);
-    padding: 12px;
-    max-height: 200px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 14px;
+    max-height: 180px;
     overflow-y: auto;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-    color: #aaa;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.vibe-progress-dialog .progress-log::-webkit-scrollbar {
+    width: 4px;
+}
+
+.vibe-progress-dialog .progress-log::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vibe-progress-dialog .progress-log::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
 }
 
 .vibe-progress-dialog .progress-log .log-entry {
     opacity: 0;
-    animation: logFadeIn 0.4s ease forwards;
+    animation: logFadeIn 0.3s ease forwards;
 }
 
 .vibe-progress-dialog .progress-log .log-entry.highlight {
@@ -249,26 +378,30 @@
 @keyframes logFadeIn {
     from {
         opacity: 0;
-        transform: translateX(-8px);
+        transform: translateY(4px);
     }
 
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0);
     }
 }
 
-/* ─── SVG Silhouette Room Blink ──────────────────────────── */
+/* ─── SVG Silhouette — Dark Ambient + Light Trace ────────── */
 .vibe-progress-dialog .silhouette-container {
     position: relative;
-    background: #b8876b;
-    border-radius: var(--vibe-radius-md, 6px);
-    padding: 10px;
+    background: linear-gradient(145deg, #0d1117, #161b22, #0d1117);
+    border-radius: 10px;
+    padding: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border: 1px solid #444;
+    border: 1px solid rgba(102, 126, 234, 0.15);
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 0 40px rgba(102, 126, 234, 0.05);
 }
 
 .vibe-progress-dialog .silhouette-container svg {
@@ -278,49 +411,82 @@
     height: auto;
 }
 
-/* All room shapes start as dark silhouettes */
+/* Room shapes: dark translucent with subtle colored edge */
 .vibe-progress-dialog .silhouette-container svg rect[data-room-id],
 .vibe-progress-dialog .silhouette-container svg polygon[data-room-id],
 .vibe-progress-dialog .silhouette-container svg circle[data-room-id] {
-    fill: #1a1205 !important;
-    stroke: #0f0b03 !important;
-    stroke-width: 3;
-    rx: 8;
-    ry: 8;
-    transition: fill 0.3s ease, stroke 0.3s ease;
+    fill: rgba(15, 20, 30, 0.85) !important;
+    stroke: rgba(80, 100, 140, 0.3) !important;
+    stroke-width: 2;
+    rx: 4;
+    ry: 4;
+    transition: fill 0.6s ease, stroke 0.6s ease;
 }
 
-/* Blink animation — highlights a room momentarily */
-@keyframes roomBlink {
+/* Light-trace beam animation on overlay paths */
+.vibe-progress-dialog .silhouette-container svg .trace-path {
+    pointer-events: none;
+}
+
+@keyframes traceBeam {
     0% {
-        fill: #1a1205;
-        stroke: #0f0b03;
+        stroke-dashoffset: 100%;
+        opacity: 0.3;
     }
 
-    15% {
-        fill: #f5ecd0;
-        stroke: #d4a824;
-        stroke-width: 4;
+    10% {
+        opacity: 1;
     }
 
-    50% {
-        fill: #f5ecd0;
-        stroke: #d4a824;
-        stroke-width: 4;
+    60% {
+        stroke-dashoffset: 0%;
+        opacity: 1;
+    }
+
+    80% {
+        stroke-dashoffset: 0%;
+        opacity: 0.4;
     }
 
     100% {
-        fill: #1a1205;
-        stroke: #0f0b03;
-        stroke-width: 3;
+        stroke-dashoffset: -30%;
+        opacity: 0;
     }
 }
 
-.vibe-progress-dialog .silhouette-container svg [data-room-id].room-blinking {
-    animation: roomBlink 1.8s ease-in-out infinite;
+/* Currently-generating room: warm radiant glow */
+.vibe-progress-dialog .silhouette-container svg [data-room-id].room-active {
+    fill: rgba(255, 215, 100, 0.15) !important;
+    stroke: rgba(255, 200, 60, 0.8) !important;
+    stroke-width: 3;
+    animation: roomGlow 1.5s ease-in-out infinite;
 }
 
-/* Hide text labels and line elements in silhouette mode */
+@keyframes roomGlow {
+
+    0%,
+    100% {
+        fill: rgba(255, 215, 100, 0.1);
+        filter: drop-shadow(0 0 6px rgba(255, 200, 60, 0.3));
+    }
+
+    50% {
+        fill: rgba(255, 215, 100, 0.2);
+        filter: drop-shadow(0 0 12px rgba(255, 200, 60, 0.6));
+    }
+}
+
+/* Completed room: cool teal with soft glow */
+.vibe-progress-dialog .silhouette-container svg [data-room-id].room-completed {
+    fill: rgba(40, 180, 120, 0.15) !important;
+    stroke: rgba(60, 200, 140, 0.6) !important;
+    stroke-width: 2;
+    animation: none;
+    transition: fill 0.8s ease, stroke 0.8s ease;
+    filter: drop-shadow(0 0 4px rgba(60, 200, 140, 0.2));
+}
+
+/* Hide text labels and door lines in silhouette mode */
 .vibe-progress-dialog .silhouette-container svg text,
 .vibe-progress-dialog .silhouette-container svg line {
     display: none !important;
@@ -331,18 +497,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     padding: 8px;
-    color: #999;
-    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
 }
 
-.vibe-progress-dialog .progress-spinner i {
-    animation: spin 1.2s linear infinite;
-    color: var(--vibe-primary, #667eea);
+.vibe-progress-dialog .progress-spinner .spinner-ring {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(102, 126, 234, 0.15);
+    border-top-color: rgba(102, 126, 234, 0.7);
+    border-radius: 50%;
+    animation: spinRing 1s linear infinite;
 }
 
-@keyframes spin {
+@keyframes spinRing {
     from {
         transform: rotate(0deg);
     }
