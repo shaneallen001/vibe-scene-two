@@ -17,12 +17,21 @@ Rules for the SVG:
 - Use a dark background color (e.g., #111111).
 - Use distinct, easily identifiable solid colors for different rooms or areas (e.g., #445566, #554433), or thematic hex codes.
 - ONLY draw the macro architectural layout of the rooms and walls. DO NOT draw small props or furniture (no beds, pillows, desks, tables, cauldrons, etc.) because these shapes will automatically be converted into physical walls by the game engine.
-- Draw rectangles for rooms (use <rect> elements). Avoid <polygon> or <circle> unless absolutely necessary.
-- IMPORTANT: For each room element (rect, polygon, circle), you MUST include a \`data-room-id\` attribute that EXACTLY matches the \`id\` field of the room from the SCENE OUTLINE JSON.
+
+SHAPE VARIETY — pick the best shape for each room:
+- <rect> for standard rectangular rooms, hallways, closets.
+- <circle> or <ellipse> for round chambers, towers, arenas, wells, circular pits.
+- <polygon> for irregular rooms: L-shaped rooms, natural caves, triangular alcoves, trapezoid rooms, or any room that is NOT a simple rectangle.
+- <path> with simple arc (A) commands for rooms with curved walls, partial circles, apse-shaped areas, or winding corridors.
+- Choose the shape that BEST represents the room's description. NOT everything should be a rectangle. Caves should be irregular polygons. Towers should be circles. Be creative and architectural.
+
+ROOM ATTRIBUTES — REQUIRED:
+- IMPORTANT: For every room shape element (rect, circle, ellipse, polygon, path), you MUST include a \`data-room-id\` attribute that EXACTLY matches the \`id\` field of the room from the SCENE OUTLINE JSON.
+- For OUTDOOR areas (courtyards, open sky, gardens, forest clearings), add \`data-outdoor="true"\` to the element. Outdoor rooms use a dashed stroke (stroke-dasharray="10,5") and semi-transparent fill. The game engine will NOT build walls for outdoor rooms.
 
 LAYOUT RULES:
 - Adjacent rooms MUST share a wall — their edges should touch exactly (e.g., room A's right edge aligns with room B's left edge at the same x coordinate). This is how real dungeon floorplans work.
-- Rooms MUST NOT overlap — meaning one room's rectangle must never extend INTO another room's interior area. Edges touching is correct; areas overlapping is not.
+- Rooms MUST NOT overlap — meaning one room's area must never extend INTO another room's interior area. Edges touching is correct; areas overlapping is not.
 - Pack rooms tightly by sharing edges. Think of it like puzzle pieces fitting together, NOT boxes with gaps between them.
 
 DOOR RULES — CORRECT ORIENTATION:

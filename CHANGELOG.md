@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0] - Robust Walling, Irregular Shapes & Rich Journals
+- **Door-Aware Wall Splitting**: Walls now split around door segments; doors are fully functional.
+- **Irregular Room Shapes**: SVG generator uses `<circle>`, `<polygon>`, `<path>`, `<ellipse>` for varied room shapes. Scene builder has full parsers for all shapes.
+- **Outdoor Spaces**: `data-outdoor="true"` rooms get journals/lights but no walls.
+- **Rich Journal Content**: Read-aloud descriptions, atmosphere, features, hazards, and interactables per room.
+
 ## [1.3.0] - Major UI Overhaul & Progress Experience
 - Redesigned Step 1 as prompt-first (full-width textarea, dice + Generate buttons).
 - Redesigned Step 2 as horizontal split (SVG left, controls/buttons right).
