@@ -361,6 +361,7 @@ export class SceneBuilder {
         // Hazards
         if (roomDef.hazards && roomDef.hazards.length > 0) {
             parts.push(`<h3>⚠️ Hazards</h3><ul style="color:#cc4444;">${roomDef.hazards.map(h => `<li>${h}</li>`).join("")}</ul>`);
+            parts.push(`<div class="vibe-hazard-monster-btn-wrapper" style="margin:8px 0;"><button class="vibe-generate-hazard-monsters" style="background:linear-gradient(135deg, #8b0000, #5c1010);color:#e8d5b5;border:1px solid #c9a44a;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;transition:all 0.2s ease;" onmouseover="this.style.background='linear-gradient(135deg, #a01010, #8b0000)';this.style.boxShadow='0 0 8px rgba(201,164,74,0.4)'" onmouseout="this.style.background='linear-gradient(135deg, #8b0000, #5c1010)';this.style.boxShadow='none'">🐉 Generate Hazard Monsters</button></div>`);
         }
 
         // Interactables
