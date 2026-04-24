@@ -104,6 +104,8 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
                 const setting = game.settings.get("vibe-common", "imageGenerationModel");
                 if (setting === "gemini-3-pro-image-preview") {
                     guidedModel = "gemini-3-pro-image-preview";
+                } else if (setting === "gemini-3.1-flash-image-preview") {
+                    guidedModel = "gemini-3.1-flash-image-preview";
                 }
             } catch (e) {
                 console.warn("SceneImageGenerator | Could not fetch imageGenerationModel setting, defaulting.");
@@ -197,6 +199,8 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
                 const setting = game.settings.get("vibe-common", "imageGenerationModel");
                 if (setting === "gemini-3-pro-image-preview") {
                     guidedModel = "gemini-3-pro-image-preview";
+                } else if (setting === "gemini-3.1-flash-image-preview") {
+                    guidedModel = "gemini-3.1-flash-image-preview";
                 }
             } catch (e) {
                 console.warn("SceneImageGenerator | Could not fetch imageGenerationModel setting, defaulting.");
