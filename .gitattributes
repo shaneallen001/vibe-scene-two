@@ -1,0 +1,7 @@
+# Keep dev-only and tooling files out of `git archive` release zips.
+dev/            export-ignore
+.agents/        export-ignore
+.gitignore      export-ignore
+.gitattributes  export-ignore
+package.json    export-ignore
+testing-loop.js export-ignore
