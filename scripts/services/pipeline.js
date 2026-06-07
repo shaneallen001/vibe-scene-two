@@ -85,17 +85,4 @@ export class ScenePipeline {
             throw error;
         }
     }
-
-    /**
-     * Temporary run method for the testing loop to exercise flow sequentially
-     */
-    async runFullTestingFlow(userPrompt) {
-        console.log("ScenePipeline | Starting full test flow...");
-        await this.generateOutline(userPrompt);
-        await this.generateSvg();
-        await this.generateImage();
-
-        console.log("ScenePipeline | Flow complete for now."); // Avoid logging entire base64 image
-        return this.state;
-    }
 }
