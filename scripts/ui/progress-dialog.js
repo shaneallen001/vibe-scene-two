@@ -14,6 +14,9 @@ export class ProgressDialog extends HandlebarsApplicationMixin(VibeApplicationV2
         this._svgContent = null;
         this._phase = options.phase || 1; // 1 = outline+SVG, 2 = image render
         this._traceAnimationFrame = null;
+        /** @type {AbortController|null} Aborts the in-flight generation when the user cancels. */
+        this._abortController = options.abortController || null;
+        this._cancelled = false;
     }
 
     static DEFAULT_OPTIONS = {
@@ -24,6 +27,9 @@ export class ProgressDialog extends HandlebarsApplicationMixin(VibeApplicationV2
         window: {
             icon: "fas fa-cog fa-spin",
             resizable: false,
+        },
+        actions: {
+            cancel: this.prototype._onCancel
         }
     };
 
@@ -233,6 +239,20 @@ export class ProgressDialog extends HandlebarsApplicationMixin(VibeApplicationV2
             el.classList.remove("room-blinking", "room-active");
             el.classList.add("room-completed");
         });
+    }
+
+    /**
+     * Cancel the in-flight generation. Aborts the controller so the underlying
+     * Gemini/image fetches reject with an AbortError, which the generator
+     * handles gracefully.
+     */
+    _onCancel(event, target) {
+        if (this._cancelled) return;
+        this._cancelled = true;
+        this.setStatus("Cancelling…");
+        this.addLog("Cancellation requested — stopping after the current step…", "highlight");
+        if (target) target.disabled = true;
+        this._abortController?.abort();
     }
 
     close(options) {

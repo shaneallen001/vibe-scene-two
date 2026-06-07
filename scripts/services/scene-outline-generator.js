@@ -39,7 +39,7 @@ GUIDELINES:
 - Be creative with the descriptions — these will become the DM's reference during gameplay.`;
     }
 
-    async generateOutline(userPrompt) {
+    async generateOutline(userPrompt, abortSignal) {
         console.log("SceneOutlineGenerator | Generating outline for prompt:", userPrompt);
         const fullPrompt = `${this.systemPrompt}\n\nUSER PROMPT: ${userPrompt}`;
 
@@ -47,7 +47,8 @@ GUIDELINES:
             const responseText = await callGemini({
                 apiKey: this.apiKey,
                 prompt: fullPrompt,
-                responseSchema: null // Using null schema format to let extractJson handle it based on old pattern
+                jsonMode: true, // request application/json for more reliable Phase 1 JSON
+                abortSignal
             });
 
             console.log("SceneOutlineGenerator | Raw Response received.");

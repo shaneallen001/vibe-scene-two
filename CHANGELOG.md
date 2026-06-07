@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.0] - Production Hardening & Foundry v14
+- **Foundry v14**: compatibility raised to minimum 14 / verified 14.360. This is now the suite's production scenes module.
+- **Project parity**: added `AGENTS.md`/`CLAUDE.md`, MIT `LICENSE`, an icon, and a polished README; the dev test harness moved into `dev/` and is no longer shipped.
+- **Light units fix**: ambient light radii now use grid distance units instead of raw pixels, so room lights no longer overshoot their walls.
+- **Image-model routing**: the configured Vibe Common image model is now honored — Imagen short→full name mapping, Gemini image models for SVG-guided rendering, clear handling of the browser-blocked DALL-E option, and the active model is logged.
+- **Inpainting masks**: all non-room background shapes are masked out, not just rectangles.
+- **Cancellable generation**: a Cancel button aborts an in-flight run, including long room-by-room inpainting.
+- **More reliable outlines**: Phase 1 outline generation uses Gemini JSON mode.
+- **Better error UX**: failures keep your place for a clean retry, and cancellations are reported distinctly from errors.
+
 ## [1.4.0] - Robust Walling, Irregular Shapes & Rich Journals
 - **Door-Aware Wall Splitting**: Walls now split around door segments; doors are fully functional.
 - **Irregular Room Shapes**: SVG generator uses `<circle>`, `<polygon>`, `<path>`, `<ellipse>` for varied room shapes. Scene builder has full parsers for all shapes.

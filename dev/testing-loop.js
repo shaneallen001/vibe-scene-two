@@ -49,15 +49,19 @@ async function runTest() {
     console.log("Vibe Scene Two | Local Test Loop Start");
     console.log("======================================");
 
-    // We will dynamically import the pipeline once it's created
-    const { ScenePipeline } = await import('./scripts/services/pipeline.js');
+    const { ScenePipeline } = await import('../scripts/services/pipeline.js');
     const pipeline = new ScenePipeline(apiKey);
 
     let userPrompt = process.argv[2] || "A cozy interior of a fantasy tavern named 'The Prancing Pony'";
     console.log(`Test Prompt: "${userPrompt}"`);
 
     try {
-        await pipeline.runFullTestingFlow(userPrompt);
+        // Exercise the three phases sequentially (the live UI drives these
+        // individually; this harness just runs them end to end).
+        await pipeline.generateOutline(userPrompt);
+        await pipeline.generateSvg();
+        await pipeline.generateImage();
+        console.log("ScenePipeline | Flow complete for now."); // Avoid logging the base64 image
 
         const outPath = path.join(outDir, 'phase1_outline.json');
         fs.writeFileSync(outPath, JSON.stringify(pipeline.state.outline, null, 2));

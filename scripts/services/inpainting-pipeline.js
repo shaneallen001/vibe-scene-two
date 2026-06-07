@@ -71,11 +71,15 @@ export class InpaintingPipeline extends ScenePipeline {
         // Set a uniform black background on the SVG itself
         svgEl.setAttribute("style", "background: #000000;");
 
-        // Remove any background rects (those without data-room-id)
-        const allRects = svgEl.querySelectorAll("rect:not([data-room-id])");
-        allRects.forEach(r => {
-            r.setAttribute("fill", "#000000");
-            r.setAttribute("stroke", "none");
+        // Black out ANY background shape without a data-room-id (not just
+        // rects — a background circle/polygon/path would otherwise leak into
+        // the mask). Room shapes carry data-room-id and are handled below.
+        const bgShapes = svgEl.querySelectorAll(
+            "rect:not([data-room-id]), circle:not([data-room-id]), ellipse:not([data-room-id]), polygon:not([data-room-id]), polyline:not([data-room-id]), path:not([data-room-id])"
+        );
+        bgShapes.forEach(s => {
+            s.setAttribute("fill", "#000000");
+            s.setAttribute("stroke", "none");
         });
 
         // Hide all text and line elements
@@ -129,7 +133,7 @@ export class InpaintingPipeline extends ScenePipeline {
      * Override Phase 3: Generate Image Map (Inpainting)
      * Iterates over every room in the outline, building the map progressively.
      */
-    async generateImage() {
+    async generateImage(abortSignal) {
         console.log(`InpaintingPipeline | --- PHASE 3: Room-by-Room Inpainting ---`);
         if (!this.state.outline) throw new Error("Missing outline for Phase 3");
         if (!this.state.svg) throw new Error("Missing SVG for Phase 3");
@@ -156,6 +160,11 @@ export class InpaintingPipeline extends ScenePipeline {
                 let attempt = 0;
                 let roomSuccess = false;
 
+                // Stop promptly if the user cancelled between rooms.
+                if (abortSignal?.aborted) {
+                    throw new DOMException("Inpainting cancelled by user.", "AbortError");
+                }
+
                 while (attempt < maxRetries && !roomSuccess) {
                     attempt++;
                     const isRetry = attempt > 1;
@@ -179,7 +188,7 @@ export class InpaintingPipeline extends ScenePipeline {
                     const roomPrompt = this.imageGenerator.generateRoomPrompt(room, title);
 
                     // Inpaint this room onto the current canvas
-                    const candidateImage = await this.imageGenerator.inpaintRegion(currentImage, mask, roomPrompt);
+                    const candidateImage = await this.imageGenerator.inpaintRegion(currentImage, mask, roomPrompt, abortSignal);
 
                     // Quality validation
                     const validation = await this.imageGenerator.validateInpaintQuality(candidateImage, roomLabel);
