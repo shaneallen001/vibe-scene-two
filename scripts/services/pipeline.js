@@ -36,13 +36,13 @@ export class ScenePipeline {
     /**
      * Phase 1: Generate Conceptual Outline
      */
-    async generateOutline(userPrompt, options = {}) {
+    async generateOutline(userPrompt, options = {}, abortSignal) {
         console.log(`ScenePipeline | --- PHASE 1: Concept to Outline ---`);
         this.state.userConcept = userPrompt;
         this.state.options = options;
 
         try {
-            this.state.outline = await this.outlineGenerator.generateOutline(userPrompt);
+            this.state.outline = await this.outlineGenerator.generateOutline(userPrompt, abortSignal);
             return this.state.outline;
         } catch (error) {
             console.error("ScenePipeline | Phase 1 Failed:", error);
@@ -53,12 +53,12 @@ export class ScenePipeline {
     /**
      * Phase 2: Generate SVG Layout
      */
-    async generateSvg() {
+    async generateSvg(abortSignal) {
         console.log(`ScenePipeline | --- PHASE 2: Outline to SVG ---`);
         if (!this.state.outline) throw new Error("Missing outline for Phase 2");
 
         try {
-            this.state.svg = await this.svgGenerator.generateSvg(this.state.outline, this.state.options);
+            this.state.svg = await this.svgGenerator.generateSvg(this.state.outline, this.state.options, abortSignal);
             return this.state.svg;
         } catch (error) {
             console.error("ScenePipeline | Phase 2 Failed:", error);
@@ -69,13 +69,13 @@ export class ScenePipeline {
     /**
      * Phase 3: Generate Image Map
      */
-    async generateImage() {
+    async generateImage(abortSignal) {
         console.log(`ScenePipeline | --- PHASE 3: SVG/Outline to Image ---`);
         if (!this.state.outline) throw new Error("Missing outline for Phase 3");
 
         try {
-            const finalPrompt = await this.imageGenerator.generateFinalPrompt(this.state.outline, this.state.options);
-            const result = await this.imageGenerator.generateImage(finalPrompt, this.state.svg, undefined, this.state.options);
+            const finalPrompt = await this.imageGenerator.generateFinalPrompt(this.state.outline, this.state.options, abortSignal);
+            const result = await this.imageGenerator.generateImage(finalPrompt, this.state.svg, abortSignal, this.state.options);
             this.state.imageBuffer = result.finalImage;
             this.state.layoutImageBuffer = result.layoutImage;
 

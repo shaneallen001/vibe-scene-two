@@ -523,3 +523,31 @@
         transform: rotate(360deg);
     }
 }
+
+.vibe-progress-dialog .progress-actions {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0 2px;
+}
+
+.vibe-progress-dialog .progress-actions .cancel-btn {
+    padding: 8px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: #ccc;
+    border: 1px solid #555;
+    border-radius: var(--vibe-radius-md, 6px);
+    transition: all 0.2s ease;
+}
+
+.vibe-progress-dialog .progress-actions .cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #888;
+    color: #fff;
+}
+
+.vibe-progress-dialog .progress-actions .cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}

@@ -47,7 +47,7 @@ DOOR RULES — CORRECT ORIENTATION:
 - No markdown formatting wrappers like \`\`\`svg or HTML wrappers. Just output the raw <svg>...</svg> element.`;
     }
 
-    async generateSvg(outline, options = {}) {
+    async generateSvg(outline, options = {}, abortSignal) {
         console.log("SvgGenerator | Generating SVG layout for outline:", outline.title);
 
         // Convert outline JSON to a clean string format for the prompt
@@ -58,7 +58,8 @@ DOOR RULES — CORRECT ORIENTATION:
             let svg = await callGemini({
                 apiKey: this.apiKey,
                 prompt: fullPrompt,
-                responseSchema: null
+                responseSchema: null,
+                abortSignal
             });
 
             console.log("SvgGenerator | Raw SVG Response received.");

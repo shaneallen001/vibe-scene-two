@@ -61,8 +61,8 @@ ${labelsRule}
 Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
     }
 
-    async generateFinalPrompt(outline, options = {}) {
-        console.log("SceneImageGenerator | Generating final prompt for Imagen");
+    async generateFinalPrompt(outline, options = {}, abortSignal) {
+        console.log("SceneImageGenerator | Generating final prompt for the image model");
         const outlineContext = JSON.stringify(outline, null, 2);
         const fullPrompt = `${this.getPromptFormatterSystem(options)}\n\nSCENE OUTLINE:\n${outlineContext}`;
 
@@ -70,7 +70,8 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
             let finalPrompt = await callGemini({
                 apiKey: this.apiKey,
                 prompt: fullPrompt,
-                responseSchema: null
+                responseSchema: null,
+                abortSignal
             });
 
             finalPrompt = finalPrompt.trim();

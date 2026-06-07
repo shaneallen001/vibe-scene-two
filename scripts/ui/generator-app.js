@@ -171,7 +171,8 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
             // Close this window and open progress dialog
             this.close();
 
-            const progress = new ProgressDialog({ phase: 1 });
+            const abortController = new AbortController();
+            const progress = new ProgressDialog({ phase: 1, abortController });
             await progress.render({ force: true });
 
             // Wait a tick for the DOM to be ready
@@ -185,7 +186,7 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
                 progress.addLog("Brainstorming scene architecture...");
                 VibeToast.info("Brainstorming scene architecture...");
 
-                await this.pipeline.generateOutline(this.userPrompt);
+                await this.pipeline.generateOutline(this.userPrompt, {}, abortController.signal);
 
                 // Show generated outline data in the log
                 const outline = this.pipeline.state.outline;
@@ -204,15 +205,20 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
                 progress.setStatus("Drafting SVG cartography...");
                 VibeToast.info("Drawing SVG Layout boundaries...");
 
-                await this.pipeline.generateSvg();
+                await this.pipeline.generateSvg(abortController.signal);
                 progress.addLog("SVG layout complete!", "highlight");
 
                 this.step = 2;
             } catch (e) {
-                VibeToast.error("Failed to generate layout: " + e.message);
-                progress.addLog(`ERROR: ${e.message}`, "highlight");
-                // Re-open generator on failure so user can retry
+                // Stay on step 1 so the user can retry (or adjust the prompt).
                 this.step = 1;
+                if (e.name === "AbortError") {
+                    VibeToast.info("Generation cancelled.");
+                    progress.addLog("Generation cancelled.", "highlight");
+                } else {
+                    VibeToast.error("Failed to generate layout: " + e.message);
+                    progress.addLog(`ERROR: ${e.message}`, "highlight");
+                }
             } finally {
                 await progress.close();
                 // Small delay to ensure Foundry fully processes the close
@@ -257,14 +263,15 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
             // Close this window and open progress dialog with SVG silhouette
             this.close();
 
-            const progress = new ProgressDialog({ phase: 2 });
+            const abortController = new AbortController();
+            const progress = new ProgressDialog({ phase: 2, abortController });
             await progress.render({ force: true });
 
             await new Promise(r => setTimeout(r, 200));
 
             const msg = this.useInpaintingPipeline
                 ? "Rendering map room-by-room (Inpainting)..."
-                : "Rendering map with Imagen 4...";
+                : "Rendering map...";
 
             progress.setStatus(msg);
             progress.addLog("Starting image diffusion process...", "highlight");
@@ -315,13 +322,19 @@ export class GeneratorApp extends HandlebarsApplicationMixin(VibeApplicationV2) 
             }
 
             try {
-                await this.pipeline.generateImage();
+                await this.pipeline.generateImage(abortController.signal);
                 progress.addLog("Image generation complete!", "highlight");
                 this.step = 3;
             } catch (e) {
-                VibeToast.error("Failed to render image: " + e.message);
-                progress.addLog(`ERROR: ${e.message}`, "highlight");
+                // Stay on step 2 so the user can retry or change toggles.
                 this.step = 2;
+                if (e.name === "AbortError") {
+                    VibeToast.info("Generation cancelled.");
+                    progress.addLog("Generation cancelled.", "highlight");
+                } else {
+                    VibeToast.error("Failed to render image: " + e.message);
+                    progress.addLog(`ERROR: ${e.message}`, "highlight");
+                }
             } finally {
                 await progress.close();
                 await new Promise(r => setTimeout(r, 100));

@@ -133,7 +133,7 @@ export class InpaintingPipeline extends ScenePipeline {
      * Override Phase 3: Generate Image Map (Inpainting)
      * Iterates over every room in the outline, building the map progressively.
      */
-    async generateImage() {
+    async generateImage(abortSignal) {
         console.log(`InpaintingPipeline | --- PHASE 3: Room-by-Room Inpainting ---`);
         if (!this.state.outline) throw new Error("Missing outline for Phase 3");
         if (!this.state.svg) throw new Error("Missing SVG for Phase 3");
@@ -160,6 +160,11 @@ export class InpaintingPipeline extends ScenePipeline {
                 let attempt = 0;
                 let roomSuccess = false;
 
+                // Stop promptly if the user cancelled between rooms.
+                if (abortSignal?.aborted) {
+                    throw new DOMException("Inpainting cancelled by user.", "AbortError");
+                }
+
                 while (attempt < maxRetries && !roomSuccess) {
                     attempt++;
                     const isRetry = attempt > 1;
@@ -183,7 +188,7 @@ export class InpaintingPipeline extends ScenePipeline {
                     const roomPrompt = this.imageGenerator.generateRoomPrompt(room, title);
 
                     // Inpaint this room onto the current canvas
-                    const candidateImage = await this.imageGenerator.inpaintRegion(currentImage, mask, roomPrompt);
+                    const candidateImage = await this.imageGenerator.inpaintRegion(currentImage, mask, roomPrompt, abortSignal);
 
                     // Quality validation
                     const validation = await this.imageGenerator.validateInpaintQuality(candidateImage, roomLabel);
