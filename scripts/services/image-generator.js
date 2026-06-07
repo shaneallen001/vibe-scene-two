@@ -1,11 +1,48 @@
 import { callGemini } from "../../../vibe-common/scripts/services/gemini-service.js";
 
+// vibe-common stores short image-model names; the Imagen :predict endpoint needs
+// the full versioned API names. (Gemini image models use their id verbatim.)
+const IMAGEN_FULL_NAMES = {
+    "imagen-3": "imagen-3.0-generate-001",
+    "imagen-4": "imagen-4.0-generate-001"
+};
+// Known-good Gemini image model for SVG-guided (generateContent) generation,
+// used when the configured model can't do guided generation.
+const DEFAULT_GUIDED_MODEL = "gemini-2.5-flash-image";
+const DEFAULT_IMAGEN_MODEL = "imagen-4.0-generate-001";
+
 /**
  * Phase 3 Generator: Final Prompt Formatting and Image Generation
  */
 export class SceneImageGenerator {
     constructor(apiKey) {
         this.apiKey = apiKey;
+    }
+
+    /**
+     * Resolve the configured image-generation model into a routing decision.
+     * @returns {{kind: "gemini"|"imagen"|"unsupported", model: string, setting: string}}
+     *   - `gemini`: a Gemini image model usable via the guided generateContent endpoint
+     *   - `imagen`: an Imagen model usable via the unguided :predict endpoint (full API name)
+     *   - `unsupported`: dall-e-3 (browser-blocked by CORS) — caller must error or fall back
+     */
+    _resolveImageModel() {
+        let setting = "imagen-4";
+        if (typeof game !== "undefined") {
+            try {
+                setting = game.settings.get("vibe-common", "imageGenerationModel") || setting;
+            } catch (e) {
+                console.warn("SceneImageGenerator | Could not fetch imageGenerationModel setting, defaulting.");
+            }
+        }
+        if (setting === "dall-e-3") {
+            return { kind: "unsupported", model: setting, setting };
+        }
+        if (setting.startsWith("imagen")) {
+            return { kind: "imagen", model: IMAGEN_FULL_NAMES[setting] || DEFAULT_IMAGEN_MODEL, setting };
+        }
+        // Any gemini-*-image* variant: use its id directly with generateContent.
+        return { kind: "gemini", model: setting, setting };
     }
 
     getPromptFormatterSystem(options = {}) {
@@ -94,25 +131,23 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
 
         const promptText = finalPrompt + " Top-down TTRPG battlemap, extremely highly detailed, 4k.";
 
+        const resolved = this._resolveImageModel();
         let requestBody;
         let endpoint;
-
-        // Fetch the user's preferred model from Foundry settings, defaulting to gemini-2.5-flash-image for guided generation.
-        let guidedModel = "gemini-2.5-flash-image";
-        if (typeof game !== "undefined") {
-            try {
-                const setting = game.settings.get("vibe-common", "imageGenerationModel");
-                if (setting === "gemini-3-pro-image-preview") {
-                    guidedModel = "gemini-3-pro-image-preview";
-                }
-            } catch (e) {
-                console.warn("SceneImageGenerator | Could not fetch imageGenerationModel setting, defaulting.");
-            }
-        }
+        let useGuided;
 
         if (base64Jpeg) {
-            console.log(`SceneImageGenerator | Attaching converted SVG as reference image to ${guidedModel}.`);
-            endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${guidedModel}:generateContent?key=${this.apiKey}`;
+            // SVG-guided generation requires a Gemini image model (generateContent
+            // with an inline image part). Imagen's :predict endpoint and DALL-E
+            // can't honor the layout reference, so fall back to a guided Gemini
+            // model when those are configured, keeping the SVG plan in play.
+            let model = resolved.kind === "gemini" ? resolved.model : DEFAULT_GUIDED_MODEL;
+            if (resolved.kind !== "gemini") {
+                console.warn(`SceneImageGenerator | Configured model "${resolved.setting}" can't do SVG-guided generation; using ${model} so the layout is honored.`);
+            }
+            useGuided = true;
+            console.log(`SceneImageGenerator | Image model: ${model} (guided generateContent, SVG attached).`);
+            endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
             requestBody = {
                 contents: [{
                     parts: [
@@ -122,8 +157,15 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
                 }]
             };
         } else {
-            console.log("SceneImageGenerator | Requesting image from Imagen 4.0");
-            endpoint = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${this.apiKey}`;
+            // No SVG reference (headless harness, or SVG conversion failed):
+            // use the unguided Imagen :predict endpoint.
+            if (resolved.kind === "unsupported") {
+                throw new Error("DALL-E 3 cannot be called from the browser (CORS). Choose a Gemini image model in Vibe Common settings.");
+            }
+            const model = resolved.kind === "imagen" ? resolved.model : DEFAULT_IMAGEN_MODEL;
+            useGuided = false;
+            console.log(`SceneImageGenerator | Image model: ${model} (Imagen predict, no SVG guidance).`);
+            endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${this.apiKey}`;
             requestBody = {
                 instances: [{ prompt: promptText }],
                 parameters: {
@@ -150,11 +192,11 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
 
         // Handle both response formats
         let b64 = null;
-        if (base64Jpeg) {
-            // gemini-2.5-flash-image uses generateContent candidate response format
+        if (useGuided) {
+            // Gemini image models use the generateContent candidate response format
             b64 = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || data?.candidates?.[0]?.content?.parts?.[0]?.inline_data?.data;
         } else {
-            // imagen-4.0 uses predict instance response format
+            // Imagen uses the predict instance response format
             b64 = data?.predictions?.[0]?.bytesBase64Encoded;
         }
 
@@ -191,17 +233,10 @@ Output ONLY the raw prompt string. No markdown formatting, no intro text.`;
     async inpaintRegion(baseImageB64, maskB64, roomPrompt, abortSignal) {
         console.log("SceneImageGenerator | Inpainting region with prompt:", roomPrompt.substring(0, 80) + "...");
 
-        let guidedModel = "gemini-2.5-flash-image";
-        if (typeof game !== "undefined") {
-            try {
-                const setting = game.settings.get("vibe-common", "imageGenerationModel");
-                if (setting === "gemini-3-pro-image-preview") {
-                    guidedModel = "gemini-3-pro-image-preview";
-                }
-            } catch (e) {
-                console.warn("SceneImageGenerator | Could not fetch imageGenerationModel setting, defaulting.");
-            }
-        }
+        // Inpainting always needs a guided (generateContent) Gemini image model.
+        const resolved = this._resolveImageModel();
+        const guidedModel = resolved.kind === "gemini" ? resolved.model : DEFAULT_GUIDED_MODEL;
+        console.log(`SceneImageGenerator | Inpaint model: ${guidedModel}.`);
 
         const editPrompt = `Edit this top-down dungeon battlemap image. The second image is a mask where WHITE regions indicate the area to paint. In that white-highlighted region, paint: ${roomPrompt}. CRITICAL: Keep all BLACK (non-masked) areas of the image COMPLETELY UNCHANGED. Only modify the white masked region. Maintain consistent art style, lighting, and perspective across the entire image.`;
 

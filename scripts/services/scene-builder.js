@@ -413,6 +413,13 @@ export class SceneBuilder {
         const offsetX = scene.dimensions?.sceneX || 0;
         const offsetY = scene.dimensions?.sceneY || 0;
 
+        // Foundry ambient-light radii are in distance units (grid "feet"), NOT
+        // pixels. Room geometry above is in image pixels, so convert before
+        // writing light.dim/bright or lights blast far past the room walls.
+        const gridSizePx = scene.grid?.size || 40;
+        const gridDistance = scene.grid?.distance || 5;
+        const pxToUnits = (px) => (px / gridSizePx) * gridDistance;
+
         const wallsData = [];
         const lightsData = [];
         const notesData = [];
@@ -471,8 +478,8 @@ export class SceneBuilder {
             lightsData.push({
                 x: sCx, y: sCy, rotation: 0,
                 config: {
-                    dim: sRadius * 2,
-                    bright: sRadius,
+                    dim: pxToUnits(sRadius * 2),
+                    bright: pxToUnits(sRadius),
                     color: "#ffc880",
                     alpha: 0.2
                 }
